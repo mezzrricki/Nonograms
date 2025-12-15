@@ -1,9 +1,11 @@
 package com.ski.mezyn.nonograms.ui.game.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -20,11 +22,19 @@ import com.ski.mezyn.nonograms.data.model.Puzzle
 import com.ski.mezyn.nonograms.data.model.GameState
 import kotlin.math.min
 
+private enum class DragDirection {
+    HORIZONTAL,
+    VERTICAL
+}
+
 @Composable
 fun NonogramGridWithClues(
     puzzle: Puzzle,
     gameState: GameState,
     onCellTap: (row: Int, col: Int) -> Unit,
+    onDragStart: (row: Int, col: Int) -> CellState,
+    onDragCell: (row: Int, col: Int, targetState: CellState) -> Unit,
+    onDragEnd: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(
@@ -51,7 +61,7 @@ fun NonogramGridWithClues(
         )
 
         val cellSizeDp = with(density) { cellSize.toDp() }
-        val gridSize = puzzle.gridSize * cellSizeDp
+        val gridSize = cellSizeDp * puzzle.gridSize
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -88,6 +98,9 @@ fun NonogramGridWithClues(
                     currentGrid = gameState.currentGrid,
                     cellSize = cellSize,
                     onCellTap = onCellTap,
+                    onDragStart = onDragStart,
+                    onDragCell = onDragCell,
+                    onDragEnd = onDragEnd,
                     modifier = Modifier.size(gridSize)
                 )
             }
@@ -101,10 +114,20 @@ private fun NonogramGrid(
     currentGrid: List<List<CellState>>,
     cellSize: Float,
     onCellTap: (row: Int, col: Int) -> Unit,
+    onDragStart: (row: Int, col: Int) -> CellState,
+    onDragCell: (row: Int, col: Int, targetState: CellState) -> Unit,
+    onDragEnd: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var draggedCells by remember { mutableStateOf<Set<Pair<Int, Int>>>(emptySet()) }
+    var isDragging by remember { mutableStateOf(false) }
+    var dragTargetState by remember { mutableStateOf<CellState?>(null) }
+    var dragStartCell by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    var dragDirection by remember { mutableStateOf<DragDirection?>(null) }
+
     Canvas(
         modifier = modifier
+            .background(Color.White)
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = { offset ->
@@ -116,8 +139,103 @@ private fun NonogramGrid(
                     }
                 )
             }
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        isDragging = true
+                        val row = (offset.y / cellSize).toInt()
+                        val col = (offset.x / cellSize).toInt()
+                        if (row in 0 until gridSize && col in 0 until gridSize) {
+                            dragStartCell = Pair(row, col)
+                            draggedCells = setOf(Pair(row, col))
+                            dragDirection = null // Reset direction
+                            // Get the target state from the first cell
+                            dragTargetState = onDragStart(row, col)
+                        }
+                    },
+                    onDrag = { change, _ ->
+                        change.consume()
+
+                        val startCell = dragStartCell ?: return@detectDragGestures
+
+                        // Allow drag to continue even if temporarily outside bounds
+                        val row = (change.position.y / cellSize).toInt()
+                        val col = (change.position.x / cellSize).toInt()
+
+                        // Determine drag direction on first move (even if outside bounds)
+                        if (dragDirection == null && (row != startCell.first || col != startCell.second)) {
+                            val rowDiff = kotlin.math.abs(row - startCell.first)
+                            val colDiff = kotlin.math.abs(col - startCell.second)
+
+                            dragDirection = if (rowDiff > colDiff) {
+                                DragDirection.VERTICAL
+                            } else {
+                                DragDirection.HORIZONTAL
+                            }
+                        }
+
+                        // Constrain to drag direction
+                        val constrainedCell = when (dragDirection) {
+                            DragDirection.HORIZONTAL -> Pair(startCell.first, col) // Lock row
+                            DragDirection.VERTICAL -> Pair(row, startCell.second) // Lock column
+                            null -> Pair(row, col) // No direction yet
+                        }
+
+                        // Clamp to grid bounds
+                        val clampedRow = constrainedCell.first.coerceIn(0 until gridSize)
+                        val clampedCol = constrainedCell.second.coerceIn(0 until gridSize)
+                        val clampedCell = Pair(clampedRow, clampedCol)
+
+                        // Apply if this is a new cell we haven't touched yet
+                        if (clampedCell !in draggedCells) {
+                            draggedCells = draggedCells + clampedCell
+                            // Apply the same state determined by the first cell
+                            dragTargetState?.let { targetState ->
+                                onDragCell(clampedCell.first, clampedCell.second, targetState)
+                            }
+                        }
+                    },
+                    onDragEnd = {
+                        isDragging = false
+                        draggedCells = emptySet()
+                        dragTargetState = null
+                        dragStartCell = null
+                        dragDirection = null
+                        onDragEnd()
+                    },
+                    onDragCancel = {
+                        isDragging = false
+                        draggedCells = emptySet()
+                        dragTargetState = null
+                        dragStartCell = null
+                        dragDirection = null
+                        onDragEnd()
+                    }
+                )
+            }
     ) {
-        // Draw cells
+        // Draw grid background with subtle alternating pattern
+        for (row in 0 until gridSize) {
+            for (col in 0 until gridSize) {
+                val x = col * cellSize
+                val y = row * cellSize
+
+                // Alternating background for better visibility
+                val bgColor = if ((row + col) % 2 == 0) {
+                    Color(0xFFF5F5F5)
+                } else {
+                    Color(0xFFEEEEEE)
+                }
+
+                drawRect(
+                    color = bgColor,
+                    topLeft = Offset(x, y),
+                    size = Size(cellSize, cellSize)
+                )
+            }
+        }
+
+        // Draw cell states on top of background
         currentGrid.forEachIndexed { row, rowCells ->
             rowCells.forEachIndexed { col, cellState ->
                 val x = col * cellSize
@@ -137,7 +255,7 @@ private fun NonogramGrid(
                         drawXMark(
                             topLeft = Offset(x, y),
                             cellSize = cellSize,
-                            color = Color.Gray
+                            color = Color(0xFF757575)
                         )
                     }
                     CellState.ERROR -> {
@@ -149,26 +267,31 @@ private fun NonogramGrid(
                         )
                     }
                     CellState.EMPTY -> {
-                        // Nothing to draw for empty cells
+                        // Background already drawn
                     }
                 }
             }
         }
 
-        // Draw grid lines
+        // Draw grid lines with pixel-perfect alignment
         for (i in 0..gridSize) {
-            val offset = i * cellSize
+            // Round to nearest pixel to avoid anti-aliasing artifacts
+            val offset = kotlin.math.round(i * cellSize)
 
-            // Thicker lines every 5 cells for better readability
-            val strokeWidth = if (i % 5 == 0) 3f else 1f
-            val lineColor = if (i % 5 == 0) Color(0xFF424242) else Color(0xFF9E9E9E)
+            // More pronounced lines every 5 cells for better readability
+            val (strokeWidth, lineColor) = when {
+                i == 0 || i == gridSize -> Pair(4f, Color(0xFF000000)) // Outer border
+                i % 5 == 0 -> Pair(3f, Color(0xFF424242)) // Thick lines every 5
+                else -> Pair(1f, Color(0xFFBDBDBD)) // Regular lines (1px for consistency)
+            }
 
             // Horizontal line
             drawLine(
                 color = lineColor,
                 start = Offset(0f, offset),
                 end = Offset(gridSize * cellSize, offset),
-                strokeWidth = strokeWidth
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Butt
             )
 
             // Vertical line
@@ -176,8 +299,22 @@ private fun NonogramGrid(
                 color = lineColor,
                 start = Offset(offset, 0f),
                 end = Offset(offset, gridSize * cellSize),
-                strokeWidth = strokeWidth
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Butt
             )
+        }
+
+        // Highlight dragged cells
+        if (isDragging) {
+            draggedCells.forEach { (row, col) ->
+                val x = col * cellSize
+                val y = row * cellSize
+                drawRect(
+                    color = Color(0x3300BCD4), // Semi-transparent cyan highlight
+                    topLeft = Offset(x, y),
+                    size = Size(cellSize, cellSize)
+                )
+            }
         }
     }
 }
@@ -187,18 +324,21 @@ private fun DrawScope.drawXMark(
     cellSize: Float,
     color: Color
 ) {
-    val padding = cellSize * 0.25f
+    val padding = cellSize * 0.3f
     val startX = topLeft.x + padding
     val startY = topLeft.y + padding
     val endX = topLeft.x + cellSize - padding
     val endY = topLeft.y + cellSize - padding
 
-    // Draw X (two diagonal lines)
+    // Calculate stroke width based on cell size for better visibility
+    val strokeWidth = (cellSize * 0.08f).coerceAtLeast(3f)
+
+    // Draw X (two diagonal lines) with thicker strokes
     drawLine(
         color = color,
         start = Offset(startX, startY),
         end = Offset(endX, endY),
-        strokeWidth = 2f,
+        strokeWidth = strokeWidth,
         cap = StrokeCap.Round
     )
 
@@ -206,7 +346,7 @@ private fun DrawScope.drawXMark(
         color = color,
         start = Offset(endX, startY),
         end = Offset(startX, endY),
-        strokeWidth = 2f,
+        strokeWidth = strokeWidth,
         cap = StrokeCap.Round
     )
 }

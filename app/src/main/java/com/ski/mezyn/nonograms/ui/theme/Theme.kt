@@ -9,35 +9,67 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Primary80,
+    onPrimary = OnPrimary80,
+    primaryContainer = PrimaryContainer80,
+    onPrimaryContainer = OnPrimaryContainer80,
+    secondary = Secondary80,
+    onSecondary = OnSecondary80,
+    secondaryContainer = SecondaryContainer80,
+    onSecondaryContainer = OnSecondaryContainer80,
+    tertiary = Tertiary80,
+    onTertiary = OnTertiary80,
+    tertiaryContainer = TertiaryContainer80,
+    onTertiaryContainer = OnTertiaryContainer80,
+    error = Error80,
+    onError = OnError80,
+    errorContainer = ErrorContainer80,
+    onErrorContainer = OnErrorContainer80,
+    surface = Surface80,
+    onSurface = OnSurface80,
+    surfaceVariant = SurfaceVariant80,
+    onSurfaceVariant = OnSurfaceVariant80,
+    outline = Outline80,
+    outlineVariant = OutlineVariant80
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = Primary40,
+    onPrimary = OnPrimary40,
+    primaryContainer = PrimaryContainer40,
+    onPrimaryContainer = OnPrimaryContainer40,
+    secondary = Secondary40,
+    onSecondary = OnSecondary40,
+    secondaryContainer = SecondaryContainer40,
+    onSecondaryContainer = OnSecondaryContainer40,
+    tertiary = Tertiary40,
+    onTertiary = OnTertiary40,
+    tertiaryContainer = TertiaryContainer40,
+    onTertiaryContainer = OnTertiaryContainer40,
+    error = Error40,
+    onError = OnError40,
+    errorContainer = ErrorContainer40,
+    onErrorContainer = OnErrorContainer40,
+    surface = Surface40,
+    onSurface = OnSurface40,
+    surfaceVariant = SurfaceVariant40,
+    onSurfaceVariant = OnSurfaceVariant40,
+    outline = Outline40,
+    outlineVariant = OutlineVariant40
 )
 
 @Composable
 fun NonogramsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,  // Disabled to use custom color palette
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -48,6 +80,16 @@ fun NonogramsTheme(
 
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            WindowCompat.getInsetsController(window, view).apply {
+                isAppearanceLightStatusBars = !darkTheme
+            }
+        }
     }
 
     MaterialTheme(

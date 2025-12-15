@@ -76,6 +76,15 @@ fun GameScreen(
                 onCellTap = { row, col ->
                     viewModel.toggleCell(row, col)
                 },
+                onDragStart = { row, col ->
+                    viewModel.startDragAction(row, col)
+                },
+                onDragCell = { row, col, targetState ->
+                    viewModel.setCellToState(row, col, targetState)
+                },
+                onDragEnd = {
+                    viewModel.finishDragAction()
+                },
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
@@ -102,6 +111,8 @@ fun GameScreen(
                 puzzleName = puzzle.name,
                 elapsedTimeMillis = gameState.elapsedTimeMillis,
                 mistakes = gameState.mistakes,
+                bestTimeMillis = uiState.bestTimeMillis,
+                isNewRecord = uiState.isNewRecord,
                 onDismiss = {
                     viewModel.dismissCompletionDialog()
                     onBackClick()
@@ -116,6 +127,8 @@ fun CompletionDialog(
     puzzleName: String,
     elapsedTimeMillis: Long,
     mistakes: Int,
+    bestTimeMillis: Long,
+    isNewRecord: Boolean,
     onDismiss: () -> Unit
 ) {
     val minutes = (elapsedTimeMillis / 1000) / 60
@@ -125,7 +138,7 @@ fun CompletionDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Puzzle Completed!",
+                text = if (isNewRecord) "New Record!" else "Puzzle Completed!",
                 style = MaterialTheme.typography.headlineSmall
             )
         },
@@ -135,7 +148,19 @@ fun CompletionDialog(
             ) {
                 Text("Congratulations! You've completed '$puzzleName'!")
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Time: ${String.format("%02d:%02d", minutes, seconds)}")
+                Text(
+                    text = "Time: ${String.format("%02d:%02d", minutes, seconds)}",
+                    style = if (isNewRecord) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (isNewRecord) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal
+                )
+
+                // Show previous best time if not a new record
+                if (!isNewRecord && bestTimeMillis != Long.MAX_VALUE) {
+                    val bestMinutes = (bestTimeMillis / 1000) / 60
+                    val bestSeconds = (bestTimeMillis / 1000) % 60
+                    Text("Best Time: ${String.format("%02d:%02d", bestMinutes, bestSeconds)}")
+                }
+
                 Text("Mistakes: $mistakes")
             }
         },

@@ -39,7 +39,7 @@ fun GameControls(
                 label = { Text("Fill") },
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Default.CheckBox,
+                        imageVector = Icons.Default.CheckCircle,
                         contentDescription = null
                     )
                 },
@@ -70,7 +70,7 @@ fun GameControls(
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Undo,
+                    imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Undo",
                     modifier = Modifier.size(20.dp)
                 )
@@ -84,7 +84,7 @@ fun GameControls(
                 modifier = Modifier.weight(1f)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Redo,
+                    imageVector = Icons.Default.ArrowForward,
                     contentDescription = "Redo",
                     modifier = Modifier.size(20.dp)
                 )
