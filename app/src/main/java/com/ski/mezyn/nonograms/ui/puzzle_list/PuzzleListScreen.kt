@@ -1,6 +1,7 @@
 package com.ski.mezyn.nonograms.ui.puzzle_list
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,11 +18,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ski.mezyn.nonograms.data.model.CellState
 import com.ski.mezyn.nonograms.data.model.Difficulty
 import com.ski.mezyn.nonograms.data.model.Puzzle
+import com.ski.mezyn.nonograms.data.repository.ProgressRepository
 import com.ski.mezyn.nonograms.ui.theme.GameColors
 import com.ski.mezyn.nonograms.ui.theme.Spacing
 
@@ -321,14 +327,98 @@ fun PuzzleCard(
                 }
             }
 
-            // Play button indicator
-            Icon(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Play puzzle",
-                tint = if (isCompleted)
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                else MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
+            // Puzzle preview
+            PuzzlePreview(
+                puzzle = puzzle,
+                progress = progress,
+                modifier = Modifier.size(48.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun PuzzlePreview(
+    puzzle: Puzzle,
+    progress: com.ski.mezyn.nonograms.data.model.PuzzleProgress?,
+    modifier: Modifier = Modifier
+) {
+    val gridToShow = when {
+        // Completed: show solution
+        progress?.isCompleted == true -> {
+            puzzle.solution.map { row ->
+                row.map { if (it) CellState.FILLED else CellState.EMPTY }
+            }
+        }
+        // In progress: show saved state
+        progress?.isInProgress == true -> {
+            ProgressRepository.deserializeGrid(progress.savedGrid!!, puzzle.gridSize)
+        }
+        // Not started: show empty grid
+        else -> {
+            List(puzzle.gridSize) { List(puzzle.gridSize) { CellState.EMPTY } }
+        }
+    }
+
+    Canvas(modifier = modifier) {
+        val canvasSize = size.minDimension
+        val cellSize = canvasSize / puzzle.gridSize
+
+        // Draw cells
+        gridToShow.forEachIndexed { row, rowCells ->
+            rowCells.forEachIndexed { col, cellState ->
+                val x = col * cellSize
+                val y = row * cellSize
+
+                when (cellState) {
+                    CellState.FILLED -> {
+                        // Draw filled cell
+                        drawRect(
+                            color = GameColors.CellFilled,
+                            topLeft = Offset(x, y),
+                            size = Size(cellSize, cellSize)
+                        )
+                    }
+                    CellState.MARKED -> {
+                        // Draw marked cell with light gray
+                        drawRect(
+                            color = GameColors.CellMarked.copy(alpha = 0.3f),
+                            topLeft = Offset(x, y),
+                            size = Size(cellSize, cellSize)
+                        )
+                    }
+                    else -> {
+                        // Draw empty cell (white)
+                        drawRect(
+                            color = Color.White,
+                            topLeft = Offset(x, y),
+                            size = Size(cellSize, cellSize)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Draw grid lines
+        for (i in 0..puzzle.gridSize) {
+            val pos = i * cellSize
+            // Draw thicker lines for every 5 cells
+            val strokeWidth = if (i % 5 == 0) 2f else 0.5f
+
+            // Vertical line
+            drawLine(
+                color = Color.Gray.copy(alpha = 0.5f),
+                start = Offset(pos, 0f),
+                end = Offset(pos, canvasSize),
+                strokeWidth = strokeWidth
+            )
+
+            // Horizontal line
+            drawLine(
+                color = Color.Gray.copy(alpha = 0.5f),
+                start = Offset(0f, pos),
+                end = Offset(canvasSize, pos),
+                strokeWidth = strokeWidth
             )
         }
     }

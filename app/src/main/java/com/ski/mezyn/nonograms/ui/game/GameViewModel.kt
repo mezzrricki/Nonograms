@@ -45,13 +45,28 @@ class GameViewModel : ViewModel() {
     fun loadPuzzle(puzzleId: String) {
         val puzzle = PuzzleRepository.getPuzzleById(puzzleId) ?: return
 
-        val initialGameState = GameState.empty(
-            puzzleId = puzzle.id,
-            gridSize = puzzle.gridSize
-        )
-
-        // Load best time for this puzzle
+        // Load progress to check for saved state
         val progress = ProgressRepository.getProgress(puzzleId)
+
+        val initialGameState = if (progress.savedGrid != null) {
+            // Restore saved progress
+            val savedGrid = ProgressRepository.deserializeGrid(progress.savedGrid, puzzle.gridSize)
+            GameState(
+                puzzleId = puzzle.id,
+                gridSize = puzzle.gridSize,
+                currentGrid = savedGrid,
+                elapsedTimeMillis = progress.savedTimeMillis,
+                mistakes = progress.savedErrors,
+                isPaused = false,
+                isCompleted = false
+            )
+        } else {
+            // Start fresh
+            GameState.empty(
+                puzzleId = puzzle.id,
+                gridSize = puzzle.gridSize
+            )
+        }
 
         _uiState.value = GameUiState(
             puzzle = puzzle,
@@ -410,6 +425,7 @@ class GameViewModel : ViewModel() {
     private fun startTimer() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
+            var secondsElapsed = 0
             while (true) {
                 delay(1000) // Update every second
                 val currentState = _uiState.value.gameState ?: return@launch
@@ -419,6 +435,12 @@ class GameViewModel : ViewModel() {
                         elapsedTimeMillis = currentState.elapsedTimeMillis + 1000
                     )
                     _uiState.value = _uiState.value.copy(gameState = newGameState)
+
+                    secondsElapsed++
+                    // Auto-save progress every 30 seconds
+                    if (secondsElapsed % 30 == 0) {
+                        saveProgress()
+                    }
                 }
             }
         }
@@ -452,8 +474,32 @@ class GameViewModel : ViewModel() {
         undoStack.add(currentState.copy())
     }
 
+    fun saveProgress() {
+        val puzzle = _uiState.value.puzzle ?: return
+        val currentState = _uiState.value.gameState ?: return
+
+        // Don't save if already completed
+        if (currentState.isCompleted) return
+
+        // Only save if some cells have been filled
+        val hasProgress = currentState.currentGrid.any { row ->
+            row.any { cell -> cell != CellState.EMPTY }
+        }
+
+        if (hasProgress) {
+            ProgressRepository.saveInProgressPuzzle(
+                puzzleId = puzzle.id,
+                grid = currentState.currentGrid,
+                timeMillis = currentState.elapsedTimeMillis,
+                moves = 0, // Not tracked in GameState
+                errors = currentState.mistakes
+            )
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
+        saveProgress()
         stopTimer()
     }
 }
