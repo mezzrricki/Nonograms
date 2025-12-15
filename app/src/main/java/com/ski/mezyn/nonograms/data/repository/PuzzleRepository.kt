@@ -21,26 +21,32 @@ object PuzzleRepository {
             *generateNaturePuzzles().toTypedArray(),
 
             // OBJECTS CATEGORY
-            *generateObjectPuzzles().toTypedArray()
+            *generateObjectPuzzles().toTypedArray(),
+
+            // SYMBOLS CATEGORY
+            *generateSymbolsPuzzles().toTypedArray(),
+
+            // FOOD CATEGORY
+            *generateFoodPuzzles().toTypedArray(),
+
+            // TRANSPORTATION CATEGORY
+            *generateTransportationPuzzles().toTypedArray(),
+
+            // MUSIC & ARTS CATEGORY
+            *generateMusicArtsPuzzles().toTypedArray(),
+
+            // SPORTS CATEGORY
+            *generateSportsPuzzles().toTypedArray(),
+
+            // HOLIDAYS CATEGORY
+            *generateHolidaysPuzzles().toTypedArray()
         )
     }
 
     fun getAllPuzzles(): List<Puzzle> = puzzles
 
-    fun getPuzzlesByDifficulty(difficulty: Difficulty): List<Puzzle> {
-        return puzzles.filter { it.difficulty == difficulty }
-    }
-
-    fun getPuzzlesByCategory(category: Category): List<Puzzle> {
-        return puzzles.filter { it.category == category }
-    }
-
     fun getPuzzleById(id: String): Puzzle? {
         return puzzles.find { it.id == id }
-    }
-
-    fun getAllCategories(): List<Category> {
-        return puzzles.map { it.category }.distinctBy { it.id }
     }
 
     private fun generateAbstractPuzzles(): List<Puzzle> {
@@ -72,6 +78,48 @@ object PuzzleRepository {
                 11111
                 01110
                 00100
+            """),
+            createPuzzle("circle", "Circle", Difficulty.SMALL, Category.ABSTRACT, """
+                01111110
+                11111111
+                11111111
+                11111111
+                11111111
+                11111111
+                11111111
+                01111110
+            """),
+            createPuzzle("triangle", "Triangle", Difficulty.SMALL, Category.ABSTRACT, """
+                00011000
+                00111100
+                01111110
+                11111111
+                11111111
+                11111111
+                11111111
+                11111111
+            """),
+            createPuzzle("spiral", "Spiral", Difficulty.MEDIUM, Category.ABSTRACT, """
+                1111111110
+                0000000110
+                0111110110
+                0100010110
+                0101110110
+                0100000110
+                0111111110
+                0000000000
+                0000000000
+                0000000000
+            """),
+            createPuzzle("checkered", "Checkered Pattern", Difficulty.SMALL, Category.ABSTRACT, """
+                10101010
+                01010101
+                10101010
+                01010101
+                10101010
+                01010101
+                10101010
+                01010101
             """)
         )
     }
@@ -94,6 +142,166 @@ object PuzzleRepository {
                 000001110000000
                 000000100000000
                 000000100000000
+            """),
+            createPuzzle("butterfly", "Butterfly", Difficulty.MEDIUM, Category.ANIMALS, """
+                1010000101
+                1111001111
+                1111111111
+                0111111110
+                0011111100
+                0011111100
+                0111111110
+                1111111111
+                1111001111
+                1010000101
+            """),
+            createPuzzle("bird", "Bird", Difficulty.SMALL, Category.ANIMALS, """
+                00011000
+                00111100
+                01111110
+                11111111
+                11111111
+                01111110
+                00111100
+                00011000
+            """),
+            createPuzzle("fish", "Fish", Difficulty.SMALL, Category.ANIMALS, """
+                00011110
+                00111111
+                01111111
+                11111111
+                11111111
+                01111111
+                00111111
+                00011110
+            """),
+            createPuzzle("rabbit", "Rabbit", Difficulty.MEDIUM, Category.ANIMALS, """
+                0100000010
+                0110000110
+                0111111110
+                0111111110
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+            """),
+            createPuzzle("dog", "Dog", Difficulty.LARGE, Category.ANIMALS, """
+                100000000001000
+                110000000011000
+                011111111110000
+                001111111111000
+                001111001111000
+                001111001111000
+                001111111111000
+                001111111111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+                000001111000000
+                000001111000000
+                000000110000000
+            """),
+            createPuzzle("turtle", "Turtle", Difficulty.MEDIUM, Category.ANIMALS, """
+                0001111000
+                0011111100
+                0111111110
+                1111111111
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                1010001010
+                1010001010
+            """),
+            createPuzzle("elephant", "Elephant", Difficulty.LARGE, Category.ANIMALS, """
+                000011111100000
+                000111111110000
+                001111111111000
+                011111111111100
+                011110000111100
+                011110000111100
+                011111111111100
+                001111111111000
+                001111111111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+                000001111000000
+                000001111000000
+            """),
+            createPuzzle("horse", "Horse", Difficulty.LARGE, Category.ANIMALS, """
+                000011111100000
+                000111111110000
+                001111111111000
+                001111001111000
+                001111001111000
+                001111111111000
+                001111111111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+                000001111000000
+                000011111100000
+                000011111100000
+                000001111000000
+            """),
+            createPuzzle("dolphin", "Dolphin", Difficulty.MEDIUM, Category.ANIMALS, """
+                0000111110
+                0001111111
+                0011111111
+                0111111111
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+            """),
+            createPuzzle("lion", "Lion", Difficulty.XLARGE, Category.ANIMALS, """
+                01000000000000010
+                01100000000000110
+                00110000000001100
+                00011111111110000
+                00111111111111000
+                01111111111111100
+                01111100011111100
+                01111100011111100
+                01111111111111100
+                00111111111111000
+                00011111111110000
+                00001111111100000
+                00000111111000000
+                00000011110000000
+                00000001100000000
+                00000001100000000
+                00000000000000000
+            """),
+            createPuzzle("giraffe", "Giraffe", Difficulty.XLARGE, Category.ANIMALS, """
+                00000001111000000
+                00000011111100000
+                00000111111110000
+                00001111111111000
+                00001111001111000
+                00001111001111000
+                00000111111110000
+                00000011111100000
+                00000001111000000
+                00000001111000000
+                00000001111000000
+                00000001111000000
+                00000011111100000
+                00000111111110000
+                00001111111111000
+                00011111111111100
+                00001111111111000
+                00000111111110000
+                00000011111100000
+                00000001111000000
             """)
         )
     }
@@ -128,6 +336,121 @@ object PuzzleRepository {
                 000000100000000
                 000000100000000
                 000001110000000
+            """),
+            createPuzzle("leaf", "Leaf", Difficulty.SMALL, Category.NATURE, """
+                00011110
+                00111111
+                01111111
+                11111110
+                11111100
+                01111000
+                00110000
+                00010000
+            """),
+            createPuzzle("acorn", "Acorn", Difficulty.SMALL, Category.NATURE, """
+                01111110
+                11111111
+                11111111
+                01111110
+                01111110
+                01111110
+                00111100
+                00011000
+            """),
+            createPuzzle("mushroom", "Mushroom", Difficulty.SMALL, Category.NATURE, """
+                01111110
+                11111111
+                11111111
+                01111110
+                00111100
+                00111100
+                00111100
+                00111100
+            """),
+            createPuzzle("cactus", "Cactus", Difficulty.MEDIUM, Category.NATURE, """
+                0001111000
+                0011111100
+                0111111110
+                0111111110
+                0011111100
+                0011111100
+                0011111100
+                0011111100
+                0011111100
+                0011111100
+            """),
+            createPuzzle("sun", "Sun", Difficulty.MEDIUM, Category.NATURE, """
+                0100000010
+                0010001000
+                0001111000
+                0011111100
+                1111111111
+                1111111111
+                0011111100
+                0001111000
+                0010001000
+                0100000010
+            """),
+            createPuzzle("moon", "Crescent Moon", Difficulty.SMALL, Category.NATURE, """
+                00111100
+                01111000
+                11110000
+                11100000
+                11100000
+                11110000
+                01111000
+                00111100
+            """),
+            createPuzzle("mountain", "Mountain", Difficulty.MEDIUM, Category.NATURE, """
+                0000110000
+                0001111000
+                0011111100
+                0111111110
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+            """),
+            createPuzzle("cloud", "Cloud", Difficulty.SMALL, Category.NATURE, """
+                00111100
+                01111110
+                11111111
+                11111111
+                11111111
+                11111111
+                01111110
+                00111100
+            """),
+            createPuzzle("rainbow", "Rainbow", Difficulty.MEDIUM, Category.NATURE, """
+                0011111100
+                0111111110
+                1111111111
+                1110000111
+                1100000011
+                1000000001
+                0000000000
+                0000000000
+                0000000000
+                0000000000
+            """),
+            createPuzzle("palm_tree", "Palm Tree", Difficulty.LARGE, Category.NATURE, """
+                100000000001000
+                110000000011000
+                011111111110000
+                001111111100000
+                000111111000000
+                000011110000000
+                000001100000000
+                000001100000000
+                000001100000000
+                000011110000000
+                000111111000000
+                001111111100000
+                011111111110000
+                001111111100000
+                000111111000000
             """)
         )
     }
@@ -145,6 +468,128 @@ object PuzzleRepository {
                 0100110100
                 0100110100
                 0111111100
+            """),
+            createPuzzle("key", "Key", Difficulty.SMALL, Category.OBJECTS, """
+                01111100
+                11111110
+                11111110
+                01111100
+                00110000
+                00110000
+                00110000
+                00110000
+            """),
+            createPuzzle("lock", "Lock", Difficulty.SMALL, Category.OBJECTS, """
+                01111110
+                11111111
+                11000011
+                11111111
+                11111111
+                11111111
+                11111111
+                01111110
+            """),
+            createPuzzle("cup", "Cup", Difficulty.SMALL, Category.OBJECTS, """
+                10000001
+                01111110
+                01111110
+                01111110
+                01111110
+                01111110
+                01111110
+                00111100
+            """),
+            createPuzzle("book", "Book", Difficulty.MEDIUM, Category.OBJECTS, """
+                0111111110
+                1111111111
+                1111111111
+                1111001111
+                1111001111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                0111111110
+            """),
+            createPuzzle("umbrella", "Umbrella", Difficulty.MEDIUM, Category.OBJECTS, """
+                0011111100
+                0111111110
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0000110000
+                0001111000
+            """),
+            createPuzzle("lightbulb", "Light Bulb", Difficulty.SMALL, Category.OBJECTS, """
+                01111110
+                11111111
+                11111111
+                11111111
+                01111110
+                00111100
+                00111100
+                00011000
+            """),
+            createPuzzle("camera", "Camera", Difficulty.MEDIUM, Category.OBJECTS, """
+                0111111110
+                1111111111
+                1111111111
+                1110110111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+            """),
+            createPuzzle("phone", "Phone", Difficulty.MEDIUM, Category.OBJECTS, """
+                0111111110
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+            """),
+            createPuzzle("chair", "Chair", Difficulty.MEDIUM, Category.OBJECTS, """
+                1111111110
+                1111111110
+                0000110000
+                0000110000
+                0000110000
+                0111111100
+                0111111100
+                0011001100
+                0011001100
+                0011001100
+            """),
+            createPuzzle("scissors", "Scissors", Difficulty.SMALL, Category.OBJECTS, """
+                01100110
+                11111111
+                11111111
+                01111110
+                00111100
+                00111100
+                01111110
+                11111111
+            """),
+            createPuzzle("lamp", "Lamp", Difficulty.MEDIUM, Category.OBJECTS, """
+                0001111000
+                0011111100
+                0111111110
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0000110000
+                0001111000
+                0011111100
             """)
         )
     }
@@ -941,6 +1386,871 @@ object PuzzleRepository {
                 0000110000
                 0001111000
                 0011111100
+            """)
+        )
+    }
+
+    private fun generateHolidaysPuzzles(): List<Puzzle> {
+        return listOf(
+            createPuzzle("holiday_snowflake", "Snowflake", Difficulty.TINY, Category.HOLIDAYS, """
+                10101
+                01110
+                11111
+                01110
+                10101
+            """),
+            createPuzzle("holiday_pumpkin", "Pumpkin", Difficulty.TINY, Category.HOLIDAYS, """
+                00100
+                01110
+                11111
+                11111
+                01110
+            """),
+            createPuzzle("holiday_heart", "Valentine Heart", Difficulty.TINY, Category.HOLIDAYS, """
+                01010
+                11111
+                11111
+                01110
+                00100
+            """),
+            createPuzzle("holiday_easter_egg", "Easter Egg", Difficulty.TINY, Category.HOLIDAYS, """
+                01110
+                11111
+                11111
+                11111
+                01110
+            """),
+            createPuzzle("holiday_christmas_tree", "Christmas Tree", Difficulty.SMALL, Category.HOLIDAYS, """
+                00011000
+                00111100
+                01111110
+                11111111
+                01111110
+                01111110
+                00111100
+                00111100
+            """),
+            createPuzzle("holiday_gift_box", "Gift Box", Difficulty.SMALL, Category.HOLIDAYS, """
+                11111111
+                01111110
+                01111110
+                01111110
+                01111110
+                01111110
+                01111110
+                11111111
+            """),
+            createPuzzle("holiday_ghost", "Ghost", Difficulty.SMALL, Category.HOLIDAYS, """
+                01111110
+                11111111
+                11011011
+                11111111
+                11111111
+                11111111
+                10111101
+                10011001
+            """),
+            createPuzzle("holiday_bunny", "Easter Bunny", Difficulty.SMALL, Category.HOLIDAYS, """
+                10100101
+                10100101
+                01111110
+                01111110
+                11111111
+                11111111
+                01111110
+                00111100
+            """),
+            createPuzzle("holiday_menorah", "Menorah", Difficulty.MEDIUM, Category.HOLIDAYS, """
+                0101010101
+                0111111110
+                0111111110
+                0011111100
+                0001111000
+                0001111000
+                0001111000
+                0011111100
+                0111111110
+                0111111110
+            """),
+            createPuzzle("holiday_jack_o_lantern", "Jack-o'-Lantern", Difficulty.MEDIUM, Category.HOLIDAYS, """
+                0001111000
+                0011111100
+                0111111110
+                0111111110
+                1110110111
+                1111111111
+                1111001111
+                0111111110
+                0011111100
+                0001111000
+            """),
+            createPuzzle("holiday_turkey", "Turkey", Difficulty.MEDIUM, Category.HOLIDAYS, """
+                0111111110
+                1111111111
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0001111000
+                0001111000
+            """),
+            createPuzzle("holiday_shamrock", "Shamrock", Difficulty.MEDIUM, Category.HOLIDAYS, """
+                0010001000
+                0111111100
+                1111111110
+                1111111110
+                0111111100
+                0001111000
+                0000110000
+                0000110000
+                0001111000
+                0001111000
+            """),
+            createPuzzle("holiday_fireworks", "Fireworks", Difficulty.MEDIUM, Category.HOLIDAYS, """
+                1000000001
+                0100110010
+                0010110100
+                0001111000
+                0011111100
+                0001111000
+                0010110100
+                0100110010
+                1000000001
+                0000110000
+            """),
+            createPuzzle("holiday_snowman", "Snowman", Difficulty.LARGE, Category.HOLIDAYS, """
+                000011111100000
+                000111111110000
+                001111111111000
+                001111001111000
+                001111111111000
+                000111111110000
+                000011111100000
+                001111111111000
+                011111111111100
+                011111111111100
+                001111111111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+            """),
+            createPuzzle("holiday_wreath", "Christmas Wreath", Difficulty.LARGE, Category.HOLIDAYS, """
+                000011111100000
+                000111111110000
+                001111001111000
+                011110000111100
+                011100000011100
+                111100000011110
+                111100000011110
+                111100000011110
+                011100000011100
+                011110000111100
+                001111001111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+            """)
+        )
+    }
+
+    private fun generateSportsPuzzles(): List<Puzzle> {
+        return listOf(
+            createPuzzle("sports_soccer", "Soccer Ball", Difficulty.TINY, Category.SPORTS, """
+                01110
+                11111
+                11111
+                11111
+                01110
+            """),
+            createPuzzle("sports_baseball", "Baseball", Difficulty.TINY, Category.SPORTS, """
+                01110
+                11011
+                11111
+                11011
+                01110
+            """),
+            createPuzzle("sports_basketball", "Basketball", Difficulty.SMALL, Category.SPORTS, """
+                01111110
+                11111111
+                11111111
+                11100111
+                11100111
+                11111111
+                11111111
+                01111110
+            """),
+            createPuzzle("sports_tennis_racket", "Tennis Racket", Difficulty.SMALL, Category.SPORTS, """
+                01111110
+                11111111
+                11011011
+                11011011
+                01111110
+                00111100
+                00011000
+                00011000
+            """),
+            createPuzzle("sports_golf_ball", "Golf Ball", Difficulty.TINY, Category.SPORTS, """
+                01110
+                11111
+                11011
+                11111
+                01110
+            """),
+            createPuzzle("sports_football", "Football", Difficulty.MEDIUM, Category.SPORTS, """
+                0001111000
+                0011111100
+                0111111110
+                1111111111
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+            """),
+            createPuzzle("sports_hockey_stick", "Hockey Stick", Difficulty.MEDIUM, Category.SPORTS, """
+                1111111110
+                1111111110
+                0000110000
+                0000110000
+                0000110000
+                0000110000
+                0000110000
+                0001111000
+                0011111100
+                0011111100
+            """),
+            createPuzzle("sports_bowling_pin", "Bowling Pin", Difficulty.MEDIUM, Category.SPORTS, """
+                0001111000
+                0011111100
+                0011111100
+                0001111000
+                0001111000
+                0011111100
+                0111111110
+                0111111110
+                0011111100
+                0001111000
+            """),
+            createPuzzle("sports_trophy", "Trophy", Difficulty.MEDIUM, Category.SPORTS, """
+                1010001010
+                1110001110
+                0111111110
+                0111111110
+                0011111100
+                0001111000
+                0001111000
+                0011111100
+                0111111110
+                0111111110
+            """),
+            createPuzzle("sports_dumbbell", "Dumbbell", Difficulty.SMALL, Category.SPORTS, """
+                11000011
+                11111111
+                11111111
+                00111100
+                00111100
+                11111111
+                11111111
+                11000011
+            """),
+            createPuzzle("sports_medal", "Medal", Difficulty.SMALL, Category.SPORTS, """
+                10100101
+                01111110
+                01111110
+                11111111
+                11111111
+                11111111
+                01111110
+                00111100
+            """),
+            createPuzzle("sports_volleyball", "Volleyball", Difficulty.SMALL, Category.SPORTS, """
+                01111110
+                11111111
+                11001111
+                11000111
+                11100011
+                11110001
+                11111111
+                01111110
+            """)
+        )
+    }
+
+    private fun generateMusicArtsPuzzles(): List<Puzzle> {
+        return listOf(
+            createPuzzle("music_note", "Music Note", Difficulty.TINY, Category.MUSIC_ARTS, """
+                00110
+                01110
+                01110
+                00110
+                00110
+            """),
+            createPuzzle("music_treble_clef", "Treble Clef", Difficulty.TINY, Category.MUSIC_ARTS, """
+                00110
+                01110
+                11110
+                01110
+                01110
+            """),
+            createPuzzle("music_guitar", "Guitar", Difficulty.SMALL, Category.MUSIC_ARTS, """
+                00111100
+                01111110
+                01111110
+                00111100
+                00011000
+                00011000
+                00111100
+                01111110
+            """),
+            createPuzzle("music_microphone", "Microphone", Difficulty.SMALL, Category.MUSIC_ARTS, """
+                01111110
+                11111111
+                11111111
+                01111110
+                00111100
+                00011000
+                00011000
+                00011000
+            """),
+            createPuzzle("music_paintbrush", "Paint Brush", Difficulty.SMALL, Category.MUSIC_ARTS, """
+                11111100
+                01111110
+                00111110
+                00011110
+                00001110
+                00000110
+                00000110
+                00000010
+            """),
+            createPuzzle("music_piano_keys", "Piano Keys", Difficulty.MEDIUM, Category.MUSIC_ARTS, """
+                1111111111
+                1010101010
+                1010101010
+                1010101010
+                1010101010
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+            """),
+            createPuzzle("music_violin", "Violin", Difficulty.MEDIUM, Category.MUSIC_ARTS, """
+                0001111000
+                0011111100
+                0111111110
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0000110000
+                0001111000
+                0001111000
+            """),
+            createPuzzle("music_drum", "Drum", Difficulty.MEDIUM, Category.MUSIC_ARTS, """
+                0111111110
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+            """),
+            createPuzzle("music_palette", "Art Palette", Difficulty.MEDIUM, Category.MUSIC_ARTS, """
+                0111111110
+                1111111111
+                1111111111
+                1110111011
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+            """),
+            createPuzzle("music_saxophone", "Saxophone", Difficulty.LARGE, Category.MUSIC_ARTS, """
+                000011111100000
+                000111111110000
+                001111111111000
+                001111001111000
+                001111001111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+                000001111000000
+                000011111100000
+                000111111110000
+                001111111111000
+                000111111110000
+                000011111100000
+            """),
+            createPuzzle("music_harp", "Harp", Difficulty.LARGE, Category.MUSIC_ARTS, """
+                000000000000110
+                000000000001110
+                000000000011110
+                000000000111110
+                100000001111110
+                110000011111110
+                111000111111110
+                111101111111110
+                111111111111110
+                011111111111100
+                001111111111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+            """),
+            createPuzzle("music_trumpet", "Trumpet", Difficulty.MEDIUM, Category.MUSIC_ARTS, """
+                0000011111
+                0000111111
+                0001111111
+                0011111110
+                0111111100
+                1111111000
+                1111110000
+                0111111000
+                0011111100
+                0001111110
+            """)
+        )
+    }
+
+    private fun generateTransportationPuzzles(): List<Puzzle> {
+        return listOf(
+            createPuzzle("transport_arrow_sign", "Arrow Sign", Difficulty.TINY, Category.TRANSPORTATION, """
+                00100
+                01110
+                11111
+                00100
+                00100
+            """),
+            createPuzzle("transport_stop_sign", "Stop Sign", Difficulty.TINY, Category.TRANSPORTATION, """
+                01110
+                11111
+                11111
+                11111
+                01110
+            """),
+            createPuzzle("transport_bicycle", "Bicycle", Difficulty.SMALL, Category.TRANSPORTATION, """
+                00011000
+                00111100
+                01111110
+                01100110
+                01100110
+                01100110
+                00100100
+                00100100
+            """),
+            createPuzzle("transport_car", "Car", Difficulty.SMALL, Category.TRANSPORTATION, """
+                00111100
+                01111110
+                11111111
+                11111111
+                11111111
+                01111110
+                01011010
+                01011010
+            """),
+            createPuzzle("transport_sailboat", "Sailboat", Difficulty.SMALL, Category.TRANSPORTATION, """
+                00001000
+                00011000
+                00111000
+                01111000
+                11111000
+                01111110
+                11111111
+                01111110
+            """),
+            createPuzzle("transport_airplane", "Airplane", Difficulty.MEDIUM, Category.TRANSPORTATION, """
+                0000110000
+                0001111000
+                0011111100
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0000010000
+            """),
+            createPuzzle("transport_train", "Train", Difficulty.MEDIUM, Category.TRANSPORTATION, """
+                0111111110
+                1111111111
+                1111111111
+                1110110111
+                1110110111
+                1111111111
+                1111111111
+                0111111110
+                0110000110
+                0110000110
+            """),
+            createPuzzle("transport_rocket", "Rocket", Difficulty.MEDIUM, Category.TRANSPORTATION, """
+                0000110000
+                0001111000
+                0011111100
+                0111111110
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0001111000
+                0001111000
+            """),
+            createPuzzle("transport_hot_air_balloon", "Hot Air Balloon", Difficulty.MEDIUM, Category.TRANSPORTATION, """
+                0011111100
+                0111111110
+                1111111111
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0000110000
+            """),
+            createPuzzle("transport_cruise_ship", "Cruise Ship", Difficulty.LARGE, Category.TRANSPORTATION, """
+                000011111100000
+                000111111110000
+                001111111111000
+                011111111111100
+                111111111111110
+                111111111111110
+                111111111111110
+                111111111111110
+                011111111111100
+                001111111111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+                000000010000000
+            """),
+            createPuzzle("transport_helicopter", "Helicopter", Difficulty.LARGE, Category.TRANSPORTATION, """
+                111111111111111
+                000000110000000
+                000001111000000
+                000011111100000
+                000111111110000
+                001111111111000
+                001111111111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+                000000110000000
+                000001111000000
+                000000110000000
+                000000010000000
+            """),
+            createPuzzle("transport_locomotive", "Steam Locomotive", Difficulty.XLARGE, Category.TRANSPORTATION, """
+                00000001111111000000
+                00000011111111100000
+                00000111111111110000
+                00001111111111111000
+                00011111100011111100
+                00111111000001111110
+                00111110000000111110
+                01111110000000111111
+                01111110011001111111
+                01111111111111111111
+                01111111111111111111
+                00111111111111111110
+                00011111111111111100
+                00001111111111111000
+                00000111111111110000
+                00000011111111100000
+                00000001111111000000
+                00000000111110000000
+                00000000011100000000
+                00000000001000000000
+            """)
+        )
+    }
+
+    private fun generateFoodPuzzles(): List<Puzzle> {
+        return listOf(
+            createPuzzle("food_apple", "Apple", Difficulty.SMALL, Category.FOOD, """
+                00111100
+                00111100
+                01111110
+                11111111
+                11111111
+                11111111
+                01111110
+                00111100
+            """),
+            createPuzzle("food_cherry", "Cherry", Difficulty.TINY, Category.FOOD, """
+                01010
+                11111
+                01110
+                01110
+                00100
+            """),
+            createPuzzle("food_grapes", "Grapes", Difficulty.MEDIUM, Category.FOOD, """
+                0001111000
+                0011111100
+                0111111110
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0000010000
+            """),
+            createPuzzle("food_pizza", "Pizza Slice", Difficulty.MEDIUM, Category.FOOD, """
+                0000000010
+                0000001110
+                0000111110
+                0001111110
+                0011111110
+                0111111110
+                0111101110
+                1111111110
+                1111111110
+                1111111100
+            """),
+            createPuzzle("food_icecream", "Ice Cream Cone", Difficulty.MEDIUM, Category.FOOD, """
+                0011111100
+                0111111110
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0000110000
+                0000010000
+            """),
+            createPuzzle("food_donut", "Donut", Difficulty.SMALL, Category.FOOD, """
+                01111110
+                11111111
+                11100111
+                11000011
+                11000011
+                11100111
+                11111111
+                01111110
+            """),
+            createPuzzle("food_hamburger", "Hamburger", Difficulty.MEDIUM, Category.FOOD, """
+                0111111110
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0111111110
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+            """),
+            createPuzzle("food_coffee", "Coffee Cup", Difficulty.SMALL, Category.FOOD, """
+                11000000
+                01111110
+                01111110
+                01111110
+                01111110
+                01111110
+                01111110
+                00111100
+            """),
+            createPuzzle("food_watermelon", "Watermelon Slice", Difficulty.MEDIUM, Category.FOOD, """
+                0011111100
+                0111111110
+                1111111111
+                1111111111
+                1110110111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+            """),
+            createPuzzle("food_cupcake", "Cupcake", Difficulty.SMALL, Category.FOOD, """
+                00111100
+                01111110
+                11111111
+                11111111
+                01111110
+                01111110
+                01111110
+                00111100
+            """),
+            createPuzzle("food_cake", "Birthday Cake", Difficulty.LARGE, Category.FOOD, """
+                000001110000000
+                000011111000000
+                000011111000000
+                001111111111000
+                011111111111100
+                111111111111110
+                111111111111110
+                111111111111110
+                111111111111110
+                011111111111100
+                001111111111000
+                000111111110000
+                000011111100000
+                000001111000000
+                000000110000000
+            """),
+            createPuzzle("food_strawberry", "Strawberry", Difficulty.SMALL, Category.FOOD, """
+                01111110
+                11111111
+                11111111
+                11111111
+                11101111
+                01111110
+                00111100
+                00011000
+            """)
+        )
+    }
+
+    private fun generateSymbolsPuzzles(): List<Puzzle> {
+        return listOf(
+            createPuzzle("symbol_star", "Star", Difficulty.TINY, Category.SYMBOLS, """
+                00100
+                01110
+                11111
+                01110
+                10101
+            """),
+            createPuzzle("symbol_smiley", "Smiley Face", Difficulty.SMALL, Category.SYMBOLS, """
+                01111110
+                11111111
+                11011011
+                11111111
+                10111101
+                11000011
+                01111110
+                00111100
+            """),
+            createPuzzle("symbol_peace", "Peace Sign", Difficulty.MEDIUM, Category.SYMBOLS, """
+                0011111100
+                0111111110
+                1111011111
+                1111011111
+                1111011111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+            """),
+            createPuzzle("symbol_anchor", "Anchor", Difficulty.MEDIUM, Category.SYMBOLS, """
+                0000110000
+                0001111000
+                0001111000
+                0000110000
+                0000110000
+                0000110000
+                0011111100
+                0111111110
+                1111111111
+                1110000111
+            """),
+            createPuzzle("symbol_crown", "Crown", Difficulty.MEDIUM, Category.SYMBOLS, """
+                1010001010
+                1110001110
+                1111111110
+                0111111100
+                0111111100
+                0111111100
+                0111111100
+                0011111000
+                0011111000
+                0001110000
+            """),
+            createPuzzle("symbol_lightning", "Lightning Bolt", Difficulty.SMALL, Category.SYMBOLS, """
+                01111000
+                01110000
+                00111000
+                00111100
+                00011100
+                00111000
+                01110000
+                11100000
+            """),
+            createPuzzle("symbol_hourglass", "Hourglass", Difficulty.SMALL, Category.SYMBOLS, """
+                11111111
+                11111111
+                01111110
+                00111100
+                00011000
+                00111100
+                01111110
+                11111111
+            """),
+            createPuzzle("symbol_shield", "Shield", Difficulty.MEDIUM, Category.SYMBOLS, """
+                0111111110
+                1111111111
+                1111111111
+                1111111111
+                1111111111
+                0111111110
+                0011111100
+                0001111000
+                0000110000
+                0000010000
+            """),
+            createPuzzle("symbol_infinity", "Infinity", Difficulty.SMALL, Category.SYMBOLS, """
+                01100110
+                11111111
+                11011011
+                11011011
+                11111111
+                01100110
+                00000000
+                00000000
+            """),
+            createPuzzle("symbol_compass", "Compass Rose", Difficulty.LARGE, Category.SYMBOLS, """
+                000000110000000
+                000001111000000
+                000001111000000
+                000000110000000
+                011000110000110
+                001100110001100
+                000110110011000
+                111111111111111
+                000110110011000
+                001100110001100
+                011000110000110
+                000000110000000
+                000001111000000
+                000001111000000
+                000000110000000
+            """),
+            createPuzzle("symbol_sun", "Sun", Difficulty.MEDIUM, Category.SYMBOLS, """
+                0100000010
+                0010001000
+                0001111000
+                0011111100
+                1111111111
+                1111111111
+                0011111100
+                0001111000
+                0010001000
+                0100000010
+            """),
+            createPuzzle("symbol_moon", "Crescent Moon", Difficulty.SMALL, Category.SYMBOLS, """
+                00111100
+                01111000
+                11110000
+                11100000
+                11100000
+                11110000
+                01111000
+                00111100
             """)
         )
     }

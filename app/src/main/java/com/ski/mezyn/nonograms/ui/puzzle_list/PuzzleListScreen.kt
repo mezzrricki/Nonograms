@@ -1,9 +1,9 @@
 package com.ski.mezyn.nonograms.ui.puzzle_list
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -139,7 +139,6 @@ fun CategorySection(
             ) {
                 difficultiesMap.forEach { (difficulty, puzzles) ->
                     DifficultySection(
-                        categoryId = category.id,
                         difficulty = difficulty,
                         puzzles = puzzles,
                         isExpanded = "${category.id}:${difficulty.name}" in expandedDifficulties,
@@ -155,7 +154,6 @@ fun CategorySection(
 
 @Composable
 fun DifficultySection(
-    categoryId: String,
     difficulty: Difficulty,
     puzzles: List<Puzzle>,
     isExpanded: Boolean,
@@ -223,6 +221,7 @@ fun DifficultySection(
     }
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun PuzzleCard(
     puzzle: Puzzle,
@@ -300,7 +299,7 @@ fun PuzzleCard(
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
-                            val minutes = (progress!!.bestTimeMillis / 1000) / 60
+                            val minutes = (progress.bestTimeMillis / 1000) / 60
                             val seconds = (progress.bestTimeMillis / 1000) % 60
                             Text(
                                 text = "Best: ${String.format("%02d:%02d", minutes, seconds)}",
@@ -312,7 +311,7 @@ fun PuzzleCard(
                     }
 
                     // Times completed
-                    if (progress!!.timesCompleted > 1) {
+                    if (progress.timesCompleted > 1) {
                         Text(
                             text = "Completed ${progress.timesCompleted}x",
                             style = MaterialTheme.typography.bodySmall,
