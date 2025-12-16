@@ -13,7 +13,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -37,7 +36,7 @@ fun NonogramGridWithClues(
     onDragEnd: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    @Suppress("UnusedBoxWithConstraintsScope")
+    @Suppress("UnusedBoxWithConstraintsScope")  // False positive - we use maxWidth and maxHeight
     BoxWithConstraints(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -47,9 +46,9 @@ fun NonogramGridWithClues(
         val maxHeightPx = with(density) { maxHeight.toPx() }
 
         // Calculate cell size based on available space
-        // Reserve space for clues (approximate)
-        val clueSpaceWidth = 60.dp
-        val clueSpaceHeight = 60.dp
+        // Reserve space for clues (more for color puzzles)
+        val clueSpaceWidth = if (puzzle.isColorPuzzle) 80.dp else 60.dp
+        val clueSpaceHeight = if (puzzle.isColorPuzzle) 80.dp else 60.dp
         val clueSpaceWidthPx = with(density) { clueSpaceWidth.toPx() }
         val clueSpaceHeightPx = with(density) { clueSpaceHeight.toPx() }
 
@@ -77,6 +76,7 @@ fun NonogramGridWithClues(
                 Spacer(modifier = Modifier.width(clueSpaceWidth))
                 ColumnClues(
                     clues = puzzle.columnClues,
+                    colorPalette = puzzle.colorPalette,
                     cellSize = cellSizeDp.value
                 )
             }
@@ -89,6 +89,7 @@ fun NonogramGridWithClues(
                 // Row clues on left
                 RowClues(
                     clues = puzzle.rowClues,
+                    colorPalette = puzzle.colorPalette,
                     cellSize = cellSizeDp.value,
                     modifier = Modifier.width(clueSpaceWidth)
                 )
@@ -145,15 +146,14 @@ private fun NonogramGrid(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
-                        isDragging = true
                         val row = (offset.y / cellSize).toInt()
                         val col = (offset.x / cellSize).toInt()
                         if (row in 0 until gridSize && col in 0 until gridSize) {
                             dragStartCell = Pair(row, col)
                             draggedCells = setOf(Pair(row, col))
-                            dragDirection = null // Reset direction
-                            // Get the target state from the first cell
+                            dragDirection = null
                             dragTargetState = onDragStart(row, col)
+                            isDragging = true
                         }
                     },
                     onDrag = { change, _ ->
@@ -272,17 +272,7 @@ private fun NonogramGrid(
                         )
                     }
                     is CellState.Error -> {
-                        // Draw error cell (red tint over the color)
-                        val cellColor = if (puzzle.isColorPuzzle && puzzle.colorPalette != null) {
-                            // Use color from palette but with red overlay
-                            if (cellState.colorIndex > 0 && cellState.colorIndex <= puzzle.colorPalette.size) {
-                                puzzle.colorPalette[cellState.colorIndex - 1].copy(alpha = 0.5f)
-                            } else {
-                                Color(0xFFEF5350)
-                            }
-                        } else {
-                            Color(0xFFEF5350) // Red for errors
-                        }
+                        // Draw error cell (red)
                         drawRect(
                             color = Color(0xFFEF5350),
                             topLeft = Offset(x, y),
