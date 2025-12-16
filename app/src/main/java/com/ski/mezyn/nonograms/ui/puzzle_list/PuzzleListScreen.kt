@@ -347,7 +347,7 @@ fun PuzzlePreview(
         // Completed: show solution
         progress?.isCompleted == true -> {
             puzzle.solution.map { row ->
-                row.map { if (it) CellState.FILLED else CellState.EMPTY }
+                row.map { if (it != 0) CellState.Filled(it) else CellState.Empty }
             }
         }
         // In progress: show saved state
@@ -356,7 +356,7 @@ fun PuzzlePreview(
         }
         // Not started: show empty grid
         else -> {
-            List(puzzle.gridSize) { List(puzzle.gridSize) { CellState.EMPTY } }
+            List(puzzle.gridSize) { List(puzzle.gridSize) { CellState.Empty } }
         }
     }
 
@@ -371,15 +371,15 @@ fun PuzzlePreview(
                 val y = row * cellSize
 
                 when (cellState) {
-                    CellState.FILLED -> {
-                        // Draw filled cell
+                    is CellState.Filled -> {
+                        // Draw filled cell (black for B&W, or color for color puzzles)
                         drawRect(
                             color = GameColors.CellFilled,
                             topLeft = Offset(x, y),
                             size = Size(cellSize, cellSize)
                         )
                     }
-                    CellState.MARKED -> {
+                    is CellState.Marked -> {
                         // Draw marked cell with light gray
                         drawRect(
                             color = GameColors.CellMarked.copy(alpha = 0.3f),

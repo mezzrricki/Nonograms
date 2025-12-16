@@ -23,6 +23,7 @@ data class GameUiState(
     val puzzle: Puzzle? = null,
     val gameState: GameState? = null,
     val inputMode: InputMode = InputMode.FILL,
+    val selectedColorIndex: Int = 1, // 1 = black for B&W, 1+ for color puzzles
     val canUndo: Boolean = false,
     val canRedo: Boolean = false,
     val showCompletionDialog: Boolean = false,
@@ -83,6 +84,7 @@ class GameViewModel : ViewModel() {
     fun toggleCell(row: Int, col: Int) {
         val currentState = _uiState.value.gameState ?: return
         val currentMode = _uiState.value.inputMode
+        val selectedColor = _uiState.value.selectedColorIndex
 
         // Save current state to undo stack before modification
         saveStateSnapshot()
@@ -94,19 +96,19 @@ class GameViewModel : ViewModel() {
                     when {
                         c != col -> cellState
                         currentMode == InputMode.FILL -> {
-                            // Toggle between EMPTY and FILLED
-                            if (cellState == CellState.FILLED || cellState == CellState.ERROR) {
-                                CellState.EMPTY
+                            // Toggle between EMPTY and FILLED with selected color
+                            if (cellState is CellState.Filled || cellState is CellState.Error) {
+                                CellState.Empty
                             } else {
-                                CellState.FILLED
+                                CellState.Filled(selectedColor)
                             }
                         }
                         currentMode == InputMode.MARK -> {
                             // Toggle between EMPTY and MARKED
-                            if (cellState == CellState.MARKED) {
-                                CellState.EMPTY
+                            if (cellState is CellState.Marked) {
+                                CellState.Empty
                             } else {
-                                CellState.MARKED
+                                CellState.Marked
                             }
                         }
                         else -> cellState
@@ -184,7 +186,7 @@ class GameViewModel : ViewModel() {
                 updatedGrid = updatedGrid.mapIndexed { r, rowCells ->
                     if (r == rowIndex) {
                         rowCells.map { cell ->
-                            if (cell == CellState.EMPTY) CellState.MARKED else cell
+                            if (cell is CellState.Empty) CellState.Marked else cell
                         }
                     } else {
                         rowCells
@@ -199,8 +201,8 @@ class GameViewModel : ViewModel() {
                 // Mark all empty cells in this column
                 updatedGrid = updatedGrid.mapIndexed { rowIndex, rowCells ->
                     rowCells.mapIndexed { c, cell ->
-                        if (c == colIndex && cell == CellState.EMPTY) {
-                            CellState.MARKED
+                        if (c == colIndex && cell is CellState.Empty) {
+                            CellState.Marked
                         } else {
                             cell
                         }
@@ -212,16 +214,20 @@ class GameViewModel : ViewModel() {
         return updatedGrid
     }
 
-    private fun isRowComplete(grid: List<List<CellState>>, rowIndex: Int, clues: List<Int>): Boolean {
+    private fun isRowComplete(grid: List<List<CellState>>, rowIndex: Int, clues: List<com.ski.mezyn.nonograms.data.model.ColorClue>): Boolean {
         val row = grid[rowIndex]
         val filledSegments = getFilledSegments(row)
-        return filledSegments == clues
+        // Extract just the counts from ColorClue for comparison (ignore color for now)
+        val clueCounts = clues.map { it.count }
+        return filledSegments == clueCounts
     }
 
-    private fun isColumnComplete(grid: List<List<CellState>>, colIndex: Int, clues: List<Int>): Boolean {
+    private fun isColumnComplete(grid: List<List<CellState>>, colIndex: Int, clues: List<com.ski.mezyn.nonograms.data.model.ColorClue>): Boolean {
         val column = grid.map { it[colIndex] }
         val filledSegments = getFilledSegments(column)
-        return filledSegments == clues
+        // Extract just the counts from ColorClue for comparison (ignore color for now)
+        val clueCounts = clues.map { it.count }
+        return filledSegments == clueCounts
     }
 
     private fun getFilledSegments(line: List<CellState>): List<Int> {
@@ -230,8 +236,8 @@ class GameViewModel : ViewModel() {
 
         for (cell in line) {
             when (cell) {
-                CellState.FILLED -> currentSegment++
-                CellState.EMPTY, CellState.MARKED, CellState.ERROR -> {
+                is CellState.Filled -> currentSegment++
+                is CellState.Empty, is CellState.Marked, is CellState.Error -> {
                     if (currentSegment > 0) {
                         segments.add(currentSegment)
                         currentSegment = 0
@@ -253,26 +259,27 @@ class GameViewModel : ViewModel() {
         saveStateSnapshot()
         redoStack.clear()
 
-        val currentState = _uiState.value.gameState ?: return CellState.EMPTY
+        val currentState = _uiState.value.gameState ?: return CellState.Empty
         val currentMode = _uiState.value.inputMode
+        val selectedColor = _uiState.value.selectedColorIndex
         val currentCellState = currentState.currentGrid[row][col]
 
         // Determine what state to apply based on first cell and mode
         val targetState = when (currentMode) {
             InputMode.FILL -> {
-                // If currently filled or error, clear it. Otherwise fill it.
-                if (currentCellState == CellState.FILLED || currentCellState == CellState.ERROR) {
-                    CellState.EMPTY
+                // If currently filled or error, clear it. Otherwise fill it with selected color
+                if (currentCellState is CellState.Filled || currentCellState is CellState.Error) {
+                    CellState.Empty
                 } else {
-                    CellState.FILLED
+                    CellState.Filled(selectedColor)
                 }
             }
             InputMode.MARK -> {
                 // If currently marked, clear it. Otherwise mark it.
-                if (currentCellState == CellState.MARKED) {
-                    CellState.EMPTY
+                if (currentCellState is CellState.Marked) {
+                    CellState.Empty
                 } else {
-                    CellState.MARKED
+                    CellState.Marked
                 }
             }
         }
@@ -281,6 +288,10 @@ class GameViewModel : ViewModel() {
         setCellToState(row, col, targetState)
 
         return targetState
+    }
+
+    fun setSelectedColor(colorIndex: Int) {
+        _uiState.value = _uiState.value.copy(selectedColorIndex = colorIndex)
     }
 
     fun setInputMode(mode: InputMode) {
@@ -332,20 +343,21 @@ class GameViewModel : ViewModel() {
         // Check filled cells against solution and mark errors
         val newGrid = currentState.currentGrid.mapIndexed { row, rowCells ->
             rowCells.mapIndexed { col, cellState ->
-                val shouldBeFilled = puzzle.solution[row][col]
+                val solutionValue = puzzle.solution[row][col]
 
                 when (cellState) {
-                    CellState.FILLED -> {
-                        if (!shouldBeFilled) {
+                    is CellState.Filled -> {
+                        // Check if wrong color or wrong cell
+                        if (solutionValue == 0 || (puzzle.isColorPuzzle && cellState.colorIndex != solutionValue)) {
                             mistakeCount++
-                            CellState.ERROR
+                            CellState.Error(cellState.colorIndex)
                         } else {
                             cellState
                         }
                     }
-                    CellState.ERROR -> {
+                    is CellState.Error -> {
                         // Keep error state
-                        if (!shouldBeFilled) {
+                        if (solutionValue == 0 || (puzzle.isColorPuzzle && cellState.colorIndex != solutionValue)) {
                             mistakeCount++
                         }
                         cellState
@@ -368,7 +380,7 @@ class GameViewModel : ViewModel() {
 
         saveStateSnapshot()
 
-        val emptyGrid = List(puzzle.gridSize) { List(puzzle.gridSize) { CellState.EMPTY } }
+        val emptyGrid = List(puzzle.gridSize) { List(puzzle.gridSize) { CellState.Empty } }
         val currentState = _uiState.value.gameState ?: return
 
         val newGameState = currentState.copy(
@@ -388,14 +400,19 @@ class GameViewModel : ViewModel() {
         val puzzle = _uiState.value.puzzle ?: return
         val currentState = _uiState.value.gameState ?: return
 
-        // Check if all cells match the solution
+        // Check if all cells match the solution (value and color)
         val isComplete = currentState.currentGrid.withIndex().all { (row, rowCells) ->
             rowCells.withIndex().all { (col, cellState) ->
-                val shouldBeFilled = puzzle.solution[row][col]
+                val solutionValue = puzzle.solution[row][col]
                 when (cellState) {
-                    CellState.FILLED -> shouldBeFilled
-                    CellState.EMPTY, CellState.MARKED -> !shouldBeFilled
-                    CellState.ERROR -> false
+                    is CellState.Filled -> {
+                        // For B&W: just check if cell should be filled
+                        // For color: check both that cell should be filled and color matches
+                        if (solutionValue == 0) false
+                        else !puzzle.isColorPuzzle || cellState.colorIndex == solutionValue
+                    }
+                    is CellState.Empty, is CellState.Marked -> solutionValue == 0
+                    is CellState.Error -> false
                 }
             }
         }
@@ -483,7 +500,7 @@ class GameViewModel : ViewModel() {
 
         // Only save if some cells have been filled
         val hasProgress = currentState.currentGrid.any { row ->
-            row.any { cell -> cell != CellState.EMPTY }
+            row.any { cell -> cell !is CellState.Empty }
         }
 
         if (hasProgress) {

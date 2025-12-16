@@ -1,6 +1,8 @@
 package com.ski.mezyn.nonograms.data.repository
 
+import androidx.compose.ui.graphics.Color
 import com.ski.mezyn.nonograms.data.model.Category
+import com.ski.mezyn.nonograms.data.model.ColorClue
 import com.ski.mezyn.nonograms.data.model.Difficulty
 import com.ski.mezyn.nonograms.data.model.Puzzle
 import com.ski.mezyn.nonograms.util.NonogramSolver
@@ -39,7 +41,10 @@ object PuzzleRepository {
             *generateSportsPuzzles().toTypedArray(),
 
             // HOLIDAYS CATEGORY
-            *generateHolidaysPuzzles().toTypedArray()
+            *generateHolidaysPuzzles().toTypedArray(),
+
+            // COLOR PUZZLES CATEGORY - Test color puzzles
+            *generateColorPuzzles().toTypedArray()
         )
     }
 
@@ -2262,16 +2267,25 @@ object PuzzleRepository {
         category: Category,
         pattern: String
     ): Puzzle {
-        // Parse the pattern string into a 2D boolean grid
+        // Parse the pattern string into a 2D int grid (0 = empty, 1 = black/filled)
         val solution = pattern.trim().lines().map { line ->
-            line.trim().map { char -> char == '1' }
+            line.trim().map { char -> if (char == '1') 1 else 0 }
         }
 
         val gridSize = solution.size
 
-        // Generate clues using NonogramSolver
-        val rowClues = NonogramSolver.generateRowClues(solution)
-        val columnClues = NonogramSolver.generateColumnClues(solution)
+        // Generate clues using NonogramSolver (converted to ColorClue format)
+        val booleanSolution = solution.map { row -> row.map { it == 1 } }
+        val rowCluesInt = NonogramSolver.generateRowClues(booleanSolution)
+        val columnCluesInt = NonogramSolver.generateColumnClues(booleanSolution)
+
+        // Convert to ColorClue format (all with colorIndex = 1 for black)
+        val rowClues = rowCluesInt.map { row ->
+            row.map { count -> ColorClue(count, colorIndex = 1) }
+        }
+        val columnClues = columnCluesInt.map { col ->
+            col.map { count -> ColorClue(count, colorIndex = 1) }
+        }
 
         return Puzzle(
             id = id,
@@ -2280,6 +2294,147 @@ object PuzzleRepository {
             category = category,
             gridSize = gridSize,
             solution = solution,
+            colorPalette = null, // B&W puzzle
+            rowClues = rowClues,
+            columnClues = columnClues
+        )
+    }
+
+    private fun generateColorPuzzles(): List<Puzzle> {
+        return listOf(
+            createColorPuzzle(
+                id = "color_rainbow_heart",
+                name = "Rainbow Heart",
+                difficulty = Difficulty.SMALL,
+                category = Category.ABSTRACT,
+                colorPalette = listOf(
+                    Color(0xFFFF0000), // Red
+                    Color(0xFFFF7F00), // Orange
+                    Color(0xFFFFFF00)  // Yellow
+                ),
+                solution = """
+                    01100110
+                    12211221
+                    12222221
+                    12222221
+                    01222210
+                    00122100
+                    00011000
+                    00001000
+                """
+            ),
+            createColorPuzzle(
+                id = "color_simple_test",
+                name = "Color Test",
+                difficulty = Difficulty.TINY,
+                category = Category.ABSTRACT,
+                colorPalette = listOf(
+                    Color(0xFFFF0000), // Red
+                    Color(0xFF0000FF)  // Blue
+                ),
+                solution = """
+                    11111
+                    10001
+                    10201
+                    10001
+                    11111
+                """
+            )
+        )
+    }
+
+    private fun createColorPuzzle(
+        id: String,
+        name: String,
+        difficulty: Difficulty,
+        category: Category,
+        colorPalette: List<Color>,
+        solution: String
+    ): Puzzle {
+        // Parse the pattern string into a 2D int grid
+        // 0 = empty, 1+ = color palette index
+        val solutionGrid = solution.trim().lines().map { line ->
+            line.trim().map { char -> char.toString().toIntOrNull() ?: 0 }
+        }
+
+        val gridSize = solutionGrid.size
+
+        // Generate clues manually for color puzzles
+        // Row clues
+        val rowClues = solutionGrid.map { row ->
+            val clues = mutableListOf<ColorClue>()
+            var currentCount = 0
+            var currentColor = 0
+
+            row.forEach { cell ->
+                if (cell != 0) {
+                    if (cell == currentColor) {
+                        currentCount++
+                    } else {
+                        if (currentCount > 0) {
+                            clues.add(ColorClue(currentCount, currentColor))
+                        }
+                        currentColor = cell
+                        currentCount = 1
+                    }
+                } else {
+                    if (currentCount > 0) {
+                        clues.add(ColorClue(currentCount, currentColor))
+                        currentCount = 0
+                        currentColor = 0
+                    }
+                }
+            }
+
+            if (currentCount > 0) {
+                clues.add(ColorClue(currentCount, currentColor))
+            }
+
+            if (clues.isEmpty()) listOf(ColorClue(0, 0)) else clues
+        }
+
+        // Column clues
+        val columnClues = (0 until gridSize).map { colIndex ->
+            val column = solutionGrid.map { it[colIndex] }
+            val clues = mutableListOf<ColorClue>()
+            var currentCount = 0
+            var currentColor = 0
+
+            column.forEach { cell ->
+                if (cell != 0) {
+                    if (cell == currentColor) {
+                        currentCount++
+                    } else {
+                        if (currentCount > 0) {
+                            clues.add(ColorClue(currentCount, currentColor))
+                        }
+                        currentColor = cell
+                        currentCount = 1
+                    }
+                } else {
+                    if (currentCount > 0) {
+                        clues.add(ColorClue(currentCount, currentColor))
+                        currentCount = 0
+                        currentColor = 0
+                    }
+                }
+            }
+
+            if (currentCount > 0) {
+                clues.add(ColorClue(currentCount, currentColor))
+            }
+
+            if (clues.isEmpty()) listOf(ColorClue(0, 0)) else clues
+        }
+
+        return Puzzle(
+            id = id,
+            name = name,
+            difficulty = difficulty,
+            category = category,
+            gridSize = gridSize,
+            solution = solutionGrid,
+            colorPalette = colorPalette,
             rowClues = rowClues,
             columnClues = columnClues
         )

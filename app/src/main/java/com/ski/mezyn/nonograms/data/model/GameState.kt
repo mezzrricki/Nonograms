@@ -11,7 +11,7 @@ data class GameState(
 ) {
     companion object {
         fun empty(puzzleId: String, gridSize: Int): GameState {
-            val emptyGrid = List(gridSize) { List(gridSize) { CellState.EMPTY } }
+            val emptyGrid = List(gridSize) { List(gridSize) { CellState.Empty } }
             return GameState(
                 puzzleId = puzzleId,
                 gridSize = gridSize,

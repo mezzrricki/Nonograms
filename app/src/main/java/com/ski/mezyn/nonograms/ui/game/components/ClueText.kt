@@ -9,10 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.ski.mezyn.nonograms.data.model.ColorClue
 
 @Composable
 fun RowClues(
-    clues: List<List<Int>>,
+    clues: List<List<ColorClue>>,
     cellSize: Float,
     modifier: Modifier = Modifier
 ) {
@@ -26,7 +27,7 @@ fun RowClues(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Text(
-                    text = rowClues.joinToString(" "),
+                    text = rowClues.joinToString(" ") { it.count.toString() },
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.End,
@@ -39,7 +40,7 @@ fun RowClues(
 
 @Composable
 fun ColumnClues(
-    clues: List<List<Int>>,
+    clues: List<List<ColorClue>>,
     cellSize: Float,
     modifier: Modifier = Modifier
 ) {
@@ -57,7 +58,7 @@ fun ColumnClues(
                 ) {
                     columnClues.forEach { clue ->
                         Text(
-                            text = clue.toString(),
+                            text = clue.count.toString(),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium,
                             textAlign = TextAlign.Center

@@ -37,6 +37,7 @@ fun NonogramGridWithClues(
     onDragEnd: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    @Suppress("UnusedBoxWithConstraintsScope")
     BoxWithConstraints(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -94,6 +95,7 @@ fun NonogramGridWithClues(
 
                 // Grid
                 NonogramGrid(
+                    puzzle = puzzle,
                     gridSize = puzzle.gridSize,
                     currentGrid = gameState.currentGrid,
                     cellSize = cellSize,
@@ -110,6 +112,7 @@ fun NonogramGridWithClues(
 
 @Composable
 private fun NonogramGrid(
+    puzzle: Puzzle,
     gridSize: Int,
     currentGrid: List<List<CellState>>,
     cellSize: Float,
@@ -242,15 +245,25 @@ private fun NonogramGrid(
                 val y = row * cellSize
 
                 when (cellState) {
-                    CellState.FILLED -> {
-                        // Draw filled cell (black)
+                    is CellState.Filled -> {
+                        // Draw filled cell with color from palette or black for B&W
+                        val cellColor = if (puzzle.isColorPuzzle && puzzle.colorPalette != null) {
+                            // Use color from palette (colorIndex is 1-based)
+                            if (cellState.colorIndex > 0 && cellState.colorIndex <= puzzle.colorPalette.size) {
+                                puzzle.colorPalette[cellState.colorIndex - 1]
+                            } else {
+                                Color.Black // Fallback
+                            }
+                        } else {
+                            Color.Black // B&W puzzle
+                        }
                         drawRect(
-                            color = Color.Black,
+                            color = cellColor,
                             topLeft = Offset(x, y),
                             size = Size(cellSize, cellSize)
                         )
                     }
-                    CellState.MARKED -> {
+                    is CellState.Marked -> {
                         // Draw X mark
                         drawXMark(
                             topLeft = Offset(x, y),
@@ -258,15 +271,31 @@ private fun NonogramGrid(
                             color = Color(0xFF757575)
                         )
                     }
-                    CellState.ERROR -> {
-                        // Draw error cell (red)
+                    is CellState.Error -> {
+                        // Draw error cell (red tint over the color)
+                        val cellColor = if (puzzle.isColorPuzzle && puzzle.colorPalette != null) {
+                            // Use color from palette but with red overlay
+                            if (cellState.colorIndex > 0 && cellState.colorIndex <= puzzle.colorPalette.size) {
+                                puzzle.colorPalette[cellState.colorIndex - 1].copy(alpha = 0.5f)
+                            } else {
+                                Color(0xFFEF5350)
+                            }
+                        } else {
+                            Color(0xFFEF5350) // Red for errors
+                        }
                         drawRect(
                             color = Color(0xFFEF5350),
                             topLeft = Offset(x, y),
                             size = Size(cellSize, cellSize)
                         )
+                        // Draw X mark on top
+                        drawXMark(
+                            topLeft = Offset(x, y),
+                            cellSize = cellSize,
+                            color = Color(0xFF8B0000)
+                        )
                     }
-                    CellState.EMPTY -> {
+                    is CellState.Empty -> {
                         // Background already drawn
                     }
                 }

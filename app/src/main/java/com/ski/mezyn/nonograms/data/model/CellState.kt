@@ -1,8 +1,8 @@
 package com.ski.mezyn.nonograms.data.model
 
-enum class CellState {
-    EMPTY,    // Not filled yet
-    FILLED,   // Player marked as filled (black)
-    MARKED,   // Player marked as definitely empty (X)
-    ERROR     // Filled but incorrect (shown after check)
+sealed class CellState {
+    object Empty : CellState()
+    object Marked : CellState()
+    data class Filled(val colorIndex: Int = 0) : CellState() // 0 = black, 1+ = color palette index
+    data class Error(val colorIndex: Int = 0) : CellState()
 }

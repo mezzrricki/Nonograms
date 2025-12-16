@@ -109,29 +109,35 @@ object ProgressRepository {
         saveProgress(updatedProgress)
     }
 
-    // Serialize grid to string: "0,1,2,3,0,1,1..." where 0=EMPTY, 1=FILLED, 2=MARKED, 3=ERROR
+    // Serialize grid to string: "0,1:0,2,3:2,0,1:1..." where format is "type" or "type:colorIndex"
+    // type: 0=EMPTY, 1=FILLED, 2=MARKED, 3=ERROR
+    // colorIndex: 0=black, 1+=color
     private fun serializeGrid(grid: List<List<CellState>>): String {
         return grid.flatten().joinToString(",") { cellState ->
             when (cellState) {
-                CellState.EMPTY -> "0"
-                CellState.FILLED -> "1"
-                CellState.MARKED -> "2"
-                CellState.ERROR -> "3"
+                is CellState.Empty -> "0"
+                is CellState.Filled -> if (cellState.colorIndex == 0) "1" else "1:${cellState.colorIndex}"
+                is CellState.Marked -> "2"
+                is CellState.Error -> if (cellState.colorIndex == 0) "3" else "3:${cellState.colorIndex}"
             }
         }
     }
 
     // Deserialize string back to grid
     fun deserializeGrid(serialized: String, gridSize: Int): List<List<CellState>> {
-        val values = serialized.split(",").map { it.toInt() }
+        val values = serialized.split(",")
         return values.chunked(gridSize).map { row ->
             row.map { value ->
-                when (value) {
-                    0 -> CellState.EMPTY
-                    1 -> CellState.FILLED
-                    2 -> CellState.MARKED
-                    3 -> CellState.ERROR
-                    else -> CellState.EMPTY
+                val parts = value.split(":")
+                val type = parts[0].toInt()
+                val colorIndex = if (parts.size > 1) parts[1].toInt() else 0
+
+                when (type) {
+                    0 -> CellState.Empty
+                    1 -> CellState.Filled(colorIndex)
+                    2 -> CellState.Marked
+                    3 -> CellState.Error(colorIndex)
+                    else -> CellState.Empty
                 }
             }
         }
